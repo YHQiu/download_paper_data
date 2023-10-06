@@ -5,7 +5,7 @@ import json
 from tqdm import tqdm
 
 def download_data_and_save_as_json():
-    url = "https://storage.googleapis.com/arxiv-dataset"
+    url = "https://storage.googleapis.com/arxiv-dataset?delimiter=/&maxResults=10000"
 
     # Send an HTTP GET request to the URL
     response = requests.get(url)
@@ -36,6 +36,10 @@ def clean_and_save_to_jsonl(contents, output_filename):
         if key.endswith('.pdf'):
             pdf_contents.append({"key": key})
 
+    # Create the 'downloaded_files' directory if it doesn't exist
+    if not os.path.exists('./downloaded_files'):
+        os.makedirs('./downloaded_files')
+
     # Write the cleaned data to a JSONL file
     with open(output_filename, 'w') as jsonl_file:
         for pdf_content in pdf_contents:
@@ -48,7 +52,7 @@ def download_files(contents, output_filename):
     downloaded_data = {"total_count": total_count, "download_index": 0}
 
     for i, content in enumerate(tqdm(contents, desc="Downloading")):
-        key = content['Key']
+        key = content['key']
         download_url = f"https://storage.googleapis.com/arxiv-dataset/{key}"
         download_path = os.path.join(output_filename, os.path.basename(key))
 
@@ -84,5 +88,5 @@ if __name__ == "__main__":
     # Clean the data and save to JSONL
     clean_and_save_to_jsonl(contents, './file_name.jsonl')
 
-    # Download the files and track progress
+    # Download the PDF files and track progress
     download_files(contents, './downloaded_files')
